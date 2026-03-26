@@ -1,15 +1,15 @@
-/*Çàäàíèå
-Ñîçäàòü òàáëèöó fine ñëåäóþùåé ñòðóêòóðû:
+/* Задание
+Создать таблицу fine следующей структуры:
 
-
-Ïîëå  Îïèñàíèå
-fine_id  êëþ÷åâîé ñòîëáåö öåëîãî òèïà ñ àâòîìàòè÷åñêèì óâåëè÷åíèåì çíà÷åíèÿ êëþ÷à íà 1
-name  ñòðîêà äëèíîé 30
-number_plate  ñòðîêà äëèíîé 6
-violation  ñòðîêà äëèíîé 50
-sum_fine  âåùåñòâåííîå ÷èñëî, ìàêñèìàëüíàÿ äëèíà 8, êîëè÷åñòâî çíàêîâ ïîñëå çàïÿòîé 2
-date_violation  äàòà
-date_payment  äàòà*/
+Поле           Описание
+fine_id        ключевой столбец целого типа с автоматическим увеличением значения ключа на 1
+name           строка длиной 30
+number_plate   строка длиной 6
+violation      строка длиной 50
+sum_fine       вещественное число, максимальная длина 8, количество знаков после запятой 2
+date_violation дата
+date_payment   дата
+*/
 
 CREATE TABLE fine(
     fine_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -17,85 +17,79 @@ CREATE TABLE fine(
     number_plate CHAR(6),
     violation VARCHAR(50),
     sum_fine DECIMAL(8, 2),
-    date_violation date,
-    date_payment date);
-    
-    
-/*Çàäàíèå  
-Â òàáëèöó fine ïåðâûå 5 ñòðîê óæå çàíåñåíû. Äîáàâèòü â òàáëèöó çàïèñè ñ êëþ÷åâûìè çíà÷åíèÿìè 6, 7, 8.*/
+    date_violation DATE,
+    date_payment DATE
+);
+
+
+/* Задание
+В таблицу fine первые 5 строк уже занесены.
+Добавить в таблицу записи с ключевыми значениями 6, 7, 8.
+*/
 
 INSERT INTO fine(name, number_plate, violation, sum_fine, date_violation, date_payment)
 VALUES
-    ('Áàðàíîâ Ï.Å.', 'Ð523ÂÒ', 'Ïðåâûøåíèå ñêîðîñòè(îò 40 äî 60)', null, '2020-02-14', null),
-    ('Àáðàìîâà Ê.À.', 'Î111ÀÂ', 'Ïðîåçä íà çàïðåùàþùèé ñèãíàë', null, '2020-02-23', null),
-    ('ßêîâëåâ Ã.Ð.', 'Ò330ÒÒ', 'Ïðîåçä íà çàïðåùàþùèé ñèãíàë', null, '2020-03-03', null);
+('Баранов П.Е.', 'Р523ВТ', 'Превышение скорости (от 40 до 60)', NULL, '2020-02-14', NULL),
+('Абрамова К.А.', 'О111АВ', 'Проезд на запрещающий сигнал', NULL, '2020-02-23', NULL),
+('Яковлев Г.Р.', 'Т330ТТ', 'Проезд на запрещающий сигнал', NULL, '2020-03-03', NULL);
 
 
-/*Ïðèìåð
+/* Пример
+Для тех, кто уже оплатил штраф, вывести информацию о том,
+изменялась ли стандартная сумма штрафа.
+*/
 
-Äëÿ òåõ, êòî óæå îïëàòèë øòðàô, âûâåñòè èíôîðìàöèþ î òîì, èçìåíÿëàñü ëè ñòàíäàðòíàÿ ñóììà øòðàôà.*/
-
-SELECT  f.name, f.number_plate, f.violation, 
-   if(
-    f.sum_fine = tv.sum_fine, "Ñòàíäàðòíàÿ ñóììà øòðàôà", 
-    if(
-      f.sum_fine < tv.sum_fine, "Óìåíüøåííàÿ ñóììà øòðàôà", "Óâåëè÷åííàÿ ñóììà øòðàôà"
+SELECT f.name, f.number_plate, f.violation,
+IF(
+    f.sum_fine = tv.sum_fine, 'Стандартная сумма штрафа',
+    IF(
+        f.sum_fine < tv.sum_fine, 'Уменьшенная сумма штрафа',
+        'Увеличенная сумма штрафа'
     )
-  ) AS description               
-FROM  fine f, traffic_violation tv
-WHERE tv.violation = f.violation and f.sum_fine IS NOT Null;
+) AS description
+FROM fine f
+JOIN traffic_violation tv ON tv.violation = f.violation
+WHERE f.sum_fine IS NOT NULL;
 
-/*Çàäàíèå
-Çàíåñòè â òàáëèöó fine ñóììû øòðàôîâ, êîòîðûå äîëæåí îïëàòèòü âîäèòåëü, â ñîîòâåòñòâèè ñ äàííûìè 
-èç òàáëèöû traffic_violation. Ïðè ýòîì ñóììû çàíîñèòü òîëüêî â ïóñòûå ïîëÿ ñòîëáöà  sum_fine.
-Òàáëèöà traffic_violationñîçäàíà è çàïîëíåíà.
-Âàæíî! Ñðàâíåíèå çíà÷åíèÿ ñòîëáöà ñ ïóñòûì çíà÷åíèåì îñóùåñòâëÿåòñÿ ñ ïîìîùüþ îïåðàòîðà IS NULL.*/
 
-UPDATE fine f, traffic_violation t
+/* Задание
+Занести в таблицу fine суммы штрафов, которые должен оплатить водитель,
+в соответствии с данными из таблицы traffic_violation.
+При этом суммы заносить только в пустые поля столбца sum_fine.
+*/
+
+UPDATE fine f
+JOIN traffic_violation t ON f.violation = t.violation
 SET f.sum_fine = t.sum_fine
-WHERE f.violation = t.violation AND f.sum_fine IS NULL 
+WHERE f.sum_fine IS NULL;
 
 
-/*Âàæíî! Â ðàçäåëå GROUP BY íóæíî ïåðå÷èñëÿòü âñå ÍÅÀÃÐÅÃÈÐÎÂÀÍÍÛÅ ñòîëáöû 
-(ê êîòîðûì íå ïðèìåíÿþòñÿ ãðóïïîâûå ôóíêöèè) èç SELECT.*/
+/* Важно!
+В разделе GROUP BY нужно перечислять все НЕАГРЕГИРОВАННЫЕ столбцы из SELECT.
+*/
 
-SELECT name, number_plate, violation, count(*)
+SELECT name, number_plate, violation, COUNT(*)
 FROM fine
 GROUP BY name, number_plate, violation;
 
 
-/*Çàäàíèå
-Âûâåñòè ôàìèëèþ, íîìåð ìàøèíû è íàðóøåíèå òîëüêî äëÿ òåõ âîäèòåëåé, êîòîðûå íà îäíîé ìàøèíå íàðóøèëè îäíî è òî æå 
-ïðàâèëî   äâà è áîëåå ðàç. Ïðè ýòîì ó÷èòûâàòü âñå íàðóøåíèÿ, íåçàâèñèìî îò òîãî îïëà÷åíû îíè èëè íåò. 
-Èíôîðìàöèþ îòñîðòèðîâàòü â àëôàâèòíîì ïîðÿäêå, ñíà÷àëà ïî ôàìèëèè âîäèòåëÿ, ïîòîì ïî íîìåðó ìàøèíû è, íàêîíåö, 
-ïî íàðóøåíèþ.*/
-
+/* Задание
+Вывести фамилию, номер машины и нарушение только для тех водителей,
+которые на одной машине нарушили одно и то же правило два и более раз.
+Отсортировать по фамилии, номеру машины и нарушению.
+*/
 
 SELECT name, number_plate, violation
 FROM fine
 GROUP BY name, number_plate, violation
 HAVING COUNT(*) > 1
-ORDER BY name ASC, number_plate ASC, violation ASC
+ORDER BY name, number_plate, violation;
 
 
-/*Çàäàíèå
-Â òàáëèöå fine óâåëè÷èòü â äâà ðàçà ñóììó íåîïëà÷åííûõ øòðàôîâ äëÿ îòîáðàííûõ íà ïðåäûäóùåì øàãå çàïèñåé. 
-
-Ïîÿñíåíèå !!! åñëè íå ïîëó÷àåòñÿ çàïðîñ èëè âàëèäàòîð âûäàåò îøèáêè, ðàñêðîéòå ýòî ïîÿñíåíèå!!!
-Âàæíî! Åñëè â çàïðîñå èñïîëüçóåòñÿ íåñêîëüêî òàáëèö èëè çàïðîñîâ, âêëþ÷àþùèõ îäèíàêîâûå ïîëÿ, òî ïðèìåíÿåòñÿ 
-ïîëíîå èìÿ ñòîëáöà, âêëþ÷àþùåãî íàçâàíèå òàáëèöû ÷åðåç ñèìâîë «.». Íàïðèìåð,  fine.name  è  query_in.name.*/
-
-
-UPDATE fine, (
-    SELECT name, number_plate, violation
-    FROM fine
-    GROUP BY name, number_plate, violation
-    HAVING COUNT(*) > 1
-    ORDER BY name ASC, number_plate ASC, violation ASC) as query_in
-SET fine.sum_fine = fine.sum_fine * 2
-WHERE date_payment IS NULL AND fine.name = query_in.name  
-
-/*2-âàðèàíò*/
+/* Задание
+Увеличить в два раза сумму неоплаченных штрафов
+для найденных выше записей.
+*/
 
 UPDATE fine f
 JOIN (
@@ -103,77 +97,48 @@ JOIN (
     FROM fine
     GROUP BY name, number_plate, violation
     HAVING COUNT(*) > 1
-) AS repeated
+) repeated
 ON f.name = repeated.name
-   AND f.number_plate = repeated.number_plate
-   AND f.violation = repeated.violation
+AND f.number_plate = repeated.number_plate
+AND f.violation = repeated.violation
 SET f.sum_fine = f.sum_fine * 2
 WHERE f.date_payment IS NULL;
 
 
-/*Ïîÿñíåíèå ïîøàãîâî:
-SELECT name, number_plate, violation ... HAVING COUNT(*) > 1
+/* Задание
+Обновить данные об оплате штрафов:
+- записать дату оплаты из таблицы payment
+- уменьшить штраф в 2 раза, если оплата в течение 20 дней
+*/
 
-Èùåò âîäèòåëåé, ó êîòîðûõ îäíî è òî æå íàðóøåíèå âñòðå÷àåòñÿ áîëüøå îäíîãî ðàçà.
-
-JOIN ïî òð¸ì ïîëÿì:
-
-name, number_plate, violation — ÷òîáû òî÷íî ïîïàñòü íà êîíêðåòíîå ïîâòîðåíèå, à íå ïðîñòî ïî èìåíè.
-
-SET f.sum_fine = f.sum_fine * 2
-
-Óâåëè÷èâàåì ñóììó øòðàôà â 2 ðàçà.
-
-WHERE f.date_payment IS NULL
-
-Òîëüêî äëÿ íåîïëà÷åííûõ øòðàôîâ.*/
-
-
-
-
-/*Çàäàíèå
-Âîäèòåëè îïëà÷èâàþò ñâîè øòðàôû. Â òàáëèöå payment çàíåñåíû äàòû èõ îïëàòû:
-
-Íåîáõîäèìî:
-â òàáëèöó fine çàíåñòè äàòó îïëàòû ñîîòâåòñòâóþùåãî øòðàôà èç òàáëèöû payment; 
-óìåíüøèòü íà÷èñëåííûé øòðàô â òàáëèöå fine â äâà ðàçà  (òîëüêî äëÿ òåõ øòðàôîâ, èíôîðìàöèÿ î êîòîðûõ çàíåñåíà â 
-òàáëèöó payment) , åñëè îïëàòà ïðîèçâåäåíà íå ïîçäíåå 20 äíåé ñî äíÿ íàðóøåíèÿ.*/
-
-
-UPDATE 
-    fine, payment
+UPDATE fine f
+JOIN payment p
+ON f.name = p.name
+AND f.number_plate = p.number_plate
+AND f.violation = p.violation
 SET 
-    fine.date_payment = payment.date_payment,
-    fine.sum_fine = IF(DATEDIFF(payment.date_payment, fine.date_violation) <= 20, fine.sum_fine / 2,fine.sum_fine)
-WHERE
-    fine.name = payment.name
-  AND fine.number_plate = payment.number_plate
-  AND fine.violation = payment.violation
-  AND fine.date_payment IS NULL;
+    f.date_payment = p.date_payment,
+    f.sum_fine = IF(
+        DATEDIFF(p.date_payment, f.date_violation) <= 20,
+        f.sum_fine / 2,
+        f.sum_fine
+    )
+WHERE f.date_payment IS NULL;
 
 
-
-
-/*Çàäàíèå
-Ñîçäàòü íîâóþ òàáëèöó back_payment, êóäà âíåñòè èíôîðìàöèþ î íåîïëà÷åííûõ øòðàôàõ 
-(Ôàìèëèþ è èíèöèàëû âîäèòåëÿ, íîìåð ìàøèíû, íàðóøåíèå, ñóììó øòðàôà  è  äàòó íàðóøåíèÿ) èç òàáëèöû fine.
-
-Ïîÿñíåíèå
-Âàæíî. Íà ýòîì øàãå íåîáõîäèìî ñîçäàòü òàáëèöó íà îñíîâå çàïðîñà! Íå íóæíî îäíèì çàïðîñîì ñîçäàâàòü òàáëèöó, 
-à âòîðûì â íåå äîáàâëÿòü ñòðîêè.*/
-
+/* Задание
+Создать таблицу back_payment с неоплаченными штрафами
+*/
 
 CREATE TABLE back_payment AS
 SELECT name, number_plate, violation, sum_fine, date_violation
 FROM fine
-WHERE date_payment IS NULL
+WHERE date_payment IS NULL;
 
 
-/*Çàäàíèå
-Óäàëèòü èç òàáëèöû fine èíôîðìàöèþ î íàðóøåíèÿõ, ñîâåðøåííûõ ðàíüøå 1 ôåâðàëÿ 2020 ãîäà. */
+/* Задание
+Удалить нарушения, совершенные раньше 1 февраля 2020 года
+*/
 
 DELETE FROM fine
-WHERE date_violation < '2020-02-01'
-
-
-
+WHERE date_violation < '2020-02-01';
